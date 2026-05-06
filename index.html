@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Shopping Cart</title>
+
+<style>
+body {
+    margin: 0;
+    background: #ddd;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* PHONE */
+.phone {
+    width: 360px;
+    height: 720px;
+    background: white;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+/* HEADER */
+.header {
+    background: linear-gradient(90deg, #ff7a5c, #ff4d6d);
+    color: white;
+    text-align: center;
+    padding: 16px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* CONTENT */
+.content {
+    overflow-y: auto;
+    flex: 1;
+    background: #f3f3f3;
+}
+
+/* STORE */
+.store {
+    background: white;
+    margin: 10px;
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.store-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* ITEM */
+.item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.item img {
+    width: 90px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.variant {
+    background: #eee;
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.price {
+    color: #ff4d6d;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+/* SOLD TEXT */
+.sold {
+    font-size: 12px;
+    color: #777;
+    margin-top: 2px;
+}
+
+/* BUTTON */
+.buy-link {
+    text-decoration: none;
+    background: #ff4d6d;
+    color: white;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 999;
+}
+
+.modal-img {
+    width: 90%;
+    max-width: 350px;
+    border-radius: 12px;
+}
+
+.close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    font-size: 30px;
+    color: white;
+    cursor: pointer;
+}
+
+.controls {
+    margin-top: 15px;
+}
+
+.controls button {
+    background: #ff4d6d;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="phone">
+    <div class="header">Shopping Cart</div>
+    <div class="content" id="cart"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img id="modalImg" class="modal-img">
+    <div class="controls">
+        <button onclick="prevImg()">⬅</button>
+        <button onclick="nextImg()">➡</button>
+    </div>
+</div>
+
+<script>
+const cartData = [
+    {
+        store: "FicoPcTradingCorp.",
+        items: [
+            {
+                title: "Fujitsu Laptop | Intel i7/i5/i3 & Celeron 4GB-16GB RAM 128GB-512GB SSD Free Shipping & Affordable*",
+                variant: "Black",
+                price: 4993,
+                sold: "10k sold",
+                link: "https://s.shopee.ph/9pawY9ouah",
+                images: [
+                    "images/laptop.png.png",
+                    "images/laptopport.png",
+                    "images/wholelaptop.png"
+                ]
+            }
+        ]
+    },
+
+    {
+        store: "Metmi.ph",
+        items: [
+            {
+                title: "Zeus K004 ( Arc-Angle ) Gaming Keyboard",
+                variant: "White",
+                price: 258,
+                sold: "10k+ sold",
+                link: "https://s.shopee.ph/6pxKzjYreE",
+                images: [
+                    "images/keyb1.png",
+                    "images/keyb2.png",
+                    "images/keyb3.png"
+                ]
+            }
+        ]
+    }
+];
+
+let currentImages = [];
+let currentIndex = 0;
+
+const cart = document.getElementById("cart");
+
+function renderCart() {
+    cart.innerHTML = "";
+
+    cartData.forEach((store) => {
+        let storeHTML = `<div class="store">
+            <div class="store-title">🏬 ${store.store}</div>`;
+
+        store.items.forEach((item) => {
+            storeHTML += `
+                <div class="item">
+                    <img src="${item.images[0]}"
+                        onclick='openModal(${JSON.stringify(item.images)})'>
+
+                    <div class="item-info">
+                        <div class="title">${item.title}</div>
+                        <div class="variant">${item.variant}</div>
+                        <div class="price">₱${item.price.toLocaleString()}</div>
+                        <div class="sold">${item.sold || ""}</div>
+                    </div>
+
+                    <a href="${item.link}" target="_blank" class="buy-link">
+                        Buy
+                    </a>
+                </div>
+            `;
+        });
+
+        storeHTML += `</div>`;
+        cart.innerHTML += storeHTML;
+    });
+}
+
+/* MODAL FUNCTIONS */
+function openModal(images) {
+    currentImages = images;
+    currentIndex = 0;
+    document.getElementById("modal").style.display = "flex";
+    document.getElementById("modalImg").src = currentImages[currentIndex];
+}
+
+function closeModal() {
+    document.getElementById("modal").style.display = "none";
+}
+
+function nextImg() {
+    if (currentIndex < currentImages.length - 1) {
+        currentIndex++;
+        document.getElementById("modalImg").src = currentImages[currentIndex];
+    }
+}
+
+function prevImg() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        document.getElementById("modalImg").src = currentImages[currentIndex];
+    }
+}
+
+renderCart();
+</script>
+
+</body>
+</html>
